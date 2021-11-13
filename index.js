@@ -1,4 +1,8 @@
-const dotenv = require('dotenv').config();
+const dotenv = require('dotenv');
+if (process.env.RUN_ENV !== 'production') {
+	dotenv.config();
+	console.log('environment is development, using dotenv...');
+}
 const spacetime = require('spacetime');
 const axios = require('axios').default;
 const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -18,7 +22,7 @@ console.log(`tickers array string: ${tickers.toString()}`);
 
 const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
 
-(async function () {
+exports.go = async function () {
 	try {
 		await doc.useServiceAccountAuth({
 			client_email: process.env.CLIENT_EMAIL,
@@ -26,10 +30,12 @@ const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
 		});
 
 		await doc.loadInfo();
+
+		main();
 	} catch (error) {
 		console.log(`error: ${error}`);
 	}
-})().then(() => main());
+};
 
 async function main() {
 	console.log(doc.title);
