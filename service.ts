@@ -26,7 +26,7 @@ const tickers: Array<string> = [
 	'grwg',
 	'low',
 ].map((e) => e.toUpperCase());
-console.log(tickers);
+
 class Options {
 	method: string;
 	url: string;
@@ -43,8 +43,8 @@ class Options {
 			});
 	}
 }
-// console.log(optionsPrototype);
-let collector: Array<string> = [];
+
+let collector: Array<string>;
 
 const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
 

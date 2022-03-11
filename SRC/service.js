@@ -26,7 +26,6 @@ const tickers = [
     'grwg',
     'low',
 ].map((e) => e.toUpperCase());
-console.log(tickers);
 class Options {
     constructor(arrayOfTickers) {
         (this.method = 'GET'),
@@ -38,8 +37,7 @@ class Options {
             });
     }
 }
-// console.log(optionsPrototype);
-let collector = [];
+let collector;
 const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
 (async function () {
     var _a;
