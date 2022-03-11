@@ -7,63 +7,95 @@ const spacetime = require('spacetime');
 const axios = require('axios').default;
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
-const tickers = ['aapl', 'tsla', 'store'].map((e) => e.toUpperCase());
-
-const options = {
-	method: 'GET',
-	url: 'https://seeking-alpha.p.rapidapi.com/symbols/get-valuation',
-	params: { symbols: tickers.toString() },
-	headers: {
-		'x-rapidapi-host': 'seeking-alpha.p.rapidapi.com',
-		'x-rapidapi-key': process.env.SA_KEY,
-	},
-};
-console.log(`tickers array string: ${tickers.toString()}`);
+const tickers = [
+	'nflx',
+	'tsm',
+	'vwagy',
+	'brk.b',
+	'poahy',
+	'rivn',
+	'aapl',
+	'tsla',
+	'stor',
+	'o',
+	'AMD',
+	'nvda',
+	'RKLB',
+	'goog',
+	'amzn',
+	'grwg',
+	'low',
+].map((e) => e.toUpperCase());
+console.log(tickers);
+class Options {
+	constructor(arrayOfTickers) {
+		(this.method = 'GET'),
+			(this.url = 'https://seeking-alpha.p.rapidapi.com/symbols/get-valuation'),
+			(this.params = { symbols: arrayOfTickers.toString() }),
+			(this.headers = {
+				'x-rapidapi-host': 'seeking-alpha.p.rapidapi.com',
+				'x-rapidapi-key': process.env.SA_KEY,
+			});
+	}
+}
+// console.log(optionsPrototype);
+let collector = [];
 
 const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
 
-exports.go = async function () {
+(async function () {
 	try {
 		await doc.useServiceAccountAuth({
 			client_email: process.env.CLIENT_EMAIL,
 			private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
 		});
-
 		await doc.loadInfo();
-
 		main();
 	} catch (error) {
 		console.log(`error: ${error}`);
 	}
-};
+})();
 
-async function main() {
-	console.log(doc.title);
-
+function main() {
 	const sheet = doc.sheetsByIndex[0];
-	console.log(sheet.title);
+	console.log(`sheet title: ${sheet.title}`);
 
-	axios
-		.request(options)
-		.then(async function (response) {
-			console.log(response.data.data);
-			await asyncForEach(response.data.data, async (element) => {
-				console.log(element.attributes.pegNongaapFy1);
-				const newRow = await sheet.addRow({
-					ticker: element.id,
-					pegFWD: element.attributes.pegNongaapFy1,
-					pegTTM: element.attributes.pegRatio,
-					date: spacetime.now('America/New_York').format('{month-pad}/{day-pad}/{year}'),
-				});
-			});
-		})
-		.catch((error) => {
-			console.error(error);
-		});
+	asyncForEach(tickers, async function (e) {
+		if (collector.length < 4) collector.push(e);
+
+		if (collector.length === 4 || e === tickers[tickers.length - 1]) {
+			console.log(`about to request these tickers: ${collector}`);
+			let options = new Options(collector);
+			await request(options, sheet);
+			console.log('resetting collector...');
+			collector = [];
+		}
+	});
 }
 
 async function asyncForEach(array, callback) {
 	for (let index = 0; index < array.length; index++) {
 		await callback(array[index], index, array);
 	}
+}
+
+async function request(options, sheet) {
+	await axios
+		.request(options)
+		.then(async function (response) {
+			// console.log(response.data.data);
+			await asyncForEach(response.data.data, async (element) => {
+				// console.log(element.attributes.pegNongaapFy1);
+				const newRow = await sheet.addRow({
+					ticker: element.id,
+					pegFWD: element.attributes.pegNongaapFy1,
+					pegTTM: element.attributes.pegRatio,
+					date: spacetime.now('America/New_York').format('{iso-month}/{date-pad}/{year}'),
+				});
+				console.log('postToSheetComplete');
+			});
+		})
+		.catch((error) => {
+			console.error(error);
+		});
 }
