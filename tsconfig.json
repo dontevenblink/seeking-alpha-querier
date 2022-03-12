@@ -1,10 +1,11 @@
 {
 	"compilerOptions": {
-		"lib": ["es2021"],
+		"lib": ["ESNext"],
 		"module": "commonjs",
-		"target": "es2019",
+		"target": "es2021",
 		"watch": true,
 		"strict": true,
+		"alwaysStrict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
