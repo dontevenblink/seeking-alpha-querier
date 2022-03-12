@@ -9,6 +9,15 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"outDir": "./SRC"
+		"outDir": "./SRC",
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+		"exactOptionalPropertyTypes": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUnusedParameters": true,
+		"importsNotUsedAsValues": "error",
+		"checkJs": true
 	}
 }
