@@ -39,7 +39,8 @@ class Options {
 }
 let collector;
 const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
-(async function () {
+start();
+async function start() {
     try {
         await doc.useServiceAccountAuth({
             client_email: process.env.CLIENT_EMAIL,
@@ -51,7 +52,7 @@ const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
     catch (error) {
         console.log(`error: ${error}`);
     }
-})();
+}
 function main() {
     const sheet = doc.sheetsByIndex[0];
     console.log(`sheet title: ${sheet.title}`);
