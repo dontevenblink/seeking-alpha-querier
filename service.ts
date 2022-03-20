@@ -1,3 +1,6 @@
+import type { AxiosResponse, ResponseType } from 'axios';
+import type { GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
+
 const dotenv = require('dotenv');
 if (process.env.RUN_ENV !== 'production') {
 	dotenv.config();
@@ -44,40 +47,66 @@ class Options {
 	}
 }
 
-let collector: Array<string>;
+interface seekingAlphaResponse {
+	id: string;
+	type: string;
+	[key: string]: any;
+	attributes: {
+		marketCap: number;
+		totalEnterprise: number;
+		lastClosePriceEarningsRatio: number;
+		priceCf: number;
+		priceSales: number;
+		priceBook: number;
+		priceTangb: number;
+		evEbitda: number;
+		evSales: number;
+		evFcf: number;
+		cShare: number;
+		peRatioFwd: number;
+		pegRatio: number;
+		pegNongaapFy1: number;
+		peGaapFy1: number;
+		peNongaapFy1: number;
+		peNongaap: number;
+		evEbitdaFy1: number;
+		evSalesFy1: number;
+		[key: string]: any;
+	};
+}
+
+let collector: Array<string> = [];
 
 const doc = new GoogleSpreadsheet(`${process.env.SHEET_ID}`);
+let sheet: GoogleSpreadsheetWorksheet;
 
-start();
+main();
 
-async function start() {
+// functions
+
+async function main() {
 	try {
 		await doc.useServiceAccountAuth({
 			client_email: process.env.CLIENT_EMAIL,
 			private_key: process.env.PRIVATE_KEY?.replace(/\\n/g, '\n'),
 		});
 		await doc.loadInfo();
-		main();
+		sheet = doc.sheetsByIndex[0];
+		await asyncForEach(tickers, loopableRequest);
 	} catch (error) {
 		console.log(`error: ${error}`);
 	}
 }
 
-function main() {
-	const sheet = doc.sheetsByIndex[0];
-	console.log(`sheet title: ${sheet.title}`);
+async function loopableRequest(e: string) {
+	if (collector.length < 4) collector.push(e);
 
-	asyncForEach(tickers, async function (e: string) {
-		if (collector.length < 4) collector.push(e);
-
-		if (collector.length === 4 || e === tickers[tickers.length - 1]) {
-			console.log(`about to request these tickers: ${collector}`);
-			let options = new Options(collector);
-			await request(options, sheet);
-			console.log('resetting collector...');
-			collector = [];
-		}
-	});
+	if (collector.length === 4 || e === tickers[tickers.length - 1]) {
+		let options = new Options(collector);
+		await requestAndPost(options);
+		console.log('resetting collector...');
+		collector = [];
+	}
 }
 
 async function asyncForEach(array: any, callback: any) {
@@ -86,23 +115,24 @@ async function asyncForEach(array: any, callback: any) {
 	}
 }
 
-async function request(options: Options, sheet: any) {
-	await axios
-		.request(options)
-		.then(async function (response: any) {
-			// console.log(response.data.data);
-			await asyncForEach(response.data.data, async (element: any) => {
-				// console.log(element.attributes.pegNongaapFy1);
-				const newRow = await sheet.addRow({
-					ticker: element.id,
-					pegFWD: element.attributes.pegNongaapFy1,
-					pegTTM: element.attributes.pegRatio,
-					date: spacetime.now('America/New_York').format('{iso-month}/{date-pad}/{year}'),
-				});
-				console.log('postToSheetComplete');
-			});
-		})
-		.catch((error: Error) => {
-			console.error(error);
-		});
+async function requestAndPost(options: Options) {
+	console.log(`requesting data on these tickers: ${collector}...`);
+	let response = await axios.request(options);
+	await loopPost(response);
+}
+
+async function loopPost(response: AxiosResponse) {
+	// console.log(response.data.data);
+	await asyncForEach(response.data.data, postToSheet);
+}
+
+async function postToSheet(element: seekingAlphaResponse) {
+	console.log('posting to sheet...');
+	const newRow = await sheet.addRow({
+		ticker: element.id,
+		pegFWD: element.attributes.pegNongaapFy1,
+		pegTTM: element.attributes.pegRatio,
+		date: spacetime.now('America/New_York').format('{iso-month}/{date-pad}/{year}'),
+	});
+	// console.log('postToSheetComplete');
 }
