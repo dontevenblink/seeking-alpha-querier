@@ -1,5 +1,8 @@
 import type { AxiosResponse, ResponseType } from 'axios';
 import type { GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
+import type { seekingAlphaResponse } from './interfaces';
+import { Options } from './Options';
+import { tickers } from './tickers';
 
 const dotenv = require('dotenv');
 if (process.env.RUN_ENV !== 'production') {
@@ -9,71 +12,6 @@ if (process.env.RUN_ENV !== 'production') {
 const spacetime = require('spacetime');
 const axios = require('axios').default;
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-
-const tickers: Array<string> = [
-	'nflx',
-	'tsm',
-	'vwagy',
-	'brk.b',
-	'poahy',
-	'rivn',
-	'aapl',
-	'tsla',
-	'stor',
-	'o',
-	'AMD',
-	'nvda',
-	'RKLB',
-	'goog',
-	'amzn',
-	'grwg',
-	'low',
-].map((e) => e.toUpperCase());
-
-class Options {
-	method: string;
-	url: string;
-	params: object;
-	headers: object;
-
-	constructor(arrayOfTickers: Array<string>) {
-		(this.method = 'GET'),
-			(this.url = 'https://seeking-alpha.p.rapidapi.com/symbols/get-valuation'),
-			(this.params = { symbols: arrayOfTickers.toString() }),
-			(this.headers = {
-				'x-rapidapi-host': 'seeking-alpha.p.rapidapi.com',
-				'x-rapidapi-key': process.env.SA_KEY,
-			});
-	}
-}
-
-interface seekingAlphaResponse {
-	id: string;
-	type: string;
-	[key: string]: any;
-	attributes: {
-		marketCap: number;
-		totalEnterprise: number;
-		lastClosePriceEarningsRatio: number;
-		priceCf: number;
-		priceSales: number;
-		priceBook: number;
-		priceTangb: number;
-		evEbitda: number;
-		evSales: number;
-		evFcf: number;
-		cShare: number;
-		peRatioFwd: number;
-		pegRatio: number;
-		pegNongaapFy1: number;
-		peGaapFy1: number;
-		peNongaapFy1: number;
-		peNongaap: number;
-		evEbitdaFy1: number;
-		evSalesFy1: number;
-		[key: string]: any;
-	};
-}
 
 let collector: Array<string> = [];
 
