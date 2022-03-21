@@ -9,7 +9,7 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"outDir": "./BUILD",
+		"outDir": "./DIST",
 		"allowUnusedLabels": false,
 		"allowUnreachableCode": false,
 		"exactOptionalPropertyTypes": true,
