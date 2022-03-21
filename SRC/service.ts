@@ -60,7 +60,6 @@ async function requestAndPost(options: Options) {
 }
 
 async function loopPost(response: AxiosResponse) {
-	// console.log(response.data.data);
 	await asyncForEach(response.data.data, postToSheet);
 }
 
@@ -72,5 +71,4 @@ async function postToSheet(element: seekingAlphaResponse) {
 		pegTTM: element.attributes.pegRatio,
 		date: spacetime.now('America/New_York').format('{iso-month}/{date-pad}/{year}'),
 	});
-	// console.log('postToSheetComplete');
 }
