@@ -39,7 +39,7 @@ async function main() {
 async function loopableRequest(e: string) {
 	if (collector.length < 4) collector.push(e);
 
-	if (collector.length === 4 || e === tickers[tickers.length - 1]) {
+	if (collector.length === 4 || e === tickers.at(-1)) {
 		let options = new Options(collector);
 		await requestAndPost(options);
 		console.log('resetting collector...');
