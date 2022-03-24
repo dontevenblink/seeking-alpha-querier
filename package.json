@@ -5,7 +5,8 @@
 	"main": "./BUILD/service.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "tsc && node ./BUILD/app.js"
+		"tsc": "tsc",
+		"start": "node ./DIST/app.js"
 	},
 	"repository": {
 		"type": "git",
